@@ -5,7 +5,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+# *.obj
 
 # Precompiled Headers
 *.gch
@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Visual studio
+.vs/
+Debug/
+x64/
+*vcxproj*
+*.sln
+
+# Shader bin
+*.spv
