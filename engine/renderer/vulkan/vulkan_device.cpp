@@ -1,7 +1,7 @@
 #include "vulkan_device.h"
-#include <stdexcept>
-#include <set>
 #include <iostream>
+#include <set>
+#include <stdexcept>
 
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -34,7 +34,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 VulkanDevice::VulkanDevice(Window& window) : window{ window } {
     CreateInstance();
     SetupDebugMessenger();
-    CreateSurface();
+    window.CreateWindowSurface(instance, &surface);
     PickPhysicalDevice();
     CreateLogicalDevice();
     CreateCommandPool();
@@ -301,11 +301,6 @@ void VulkanDevice::SetupDebugMessenger()
     if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
-}
-
-void VulkanDevice::CreateSurface()
-{
-    window.CreateWindowSurface(instance, &surface);
 }
 
 void VulkanDevice::PickPhysicalDevice()

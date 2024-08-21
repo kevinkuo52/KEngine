@@ -1,11 +1,10 @@
+#include "main.h"
+#include <iostream>
 #include "engine/engine.h"
-
-
 int main() {
-    Engine engine;
-
     try {
-        engine.run();
+        Engine engine;
+        engine.MainLoop();
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

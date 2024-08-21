@@ -63,7 +63,6 @@ public:
 private:
     void CreateInstance();
     void SetupDebugMessenger();
-    void CreateSurface();
     void PickPhysicalDevice();
     void CreateLogicalDevice();
     void CreateCommandPool();
