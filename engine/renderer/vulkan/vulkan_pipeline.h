@@ -3,25 +3,16 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <cstdint> // Necessary for uint32_t
 #include <vector>
 #include "vulkan_device.h"
 #include "../../mesh/mesh.h"
+#include "../../view/camera.h"
+#include "../../view/main_camera.h"
 #include "../../view/window.h"
 #include "../../importer/tinyobj_importer.h"
 
 // TODO REFACOR IN PROGRESS . . .
-
-struct UniformBufferObject {
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 proj;
-};
 
 class VulkanPipeline
 {
@@ -40,6 +31,8 @@ private:
     const std::string TEXTURE_PATH = "application/scene_asset/model/viking_room.png";
 
     Window& window;
+    Camera& camera;
+    MainCamera& mainCamera;
     VulkanDevice& device;
     TinyObjectImporter& importer;
 
@@ -118,7 +111,7 @@ private:
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 public:
-    VulkanPipeline(Window& window, VulkanDevice& device, TinyObjectImporter& importer);
+    VulkanPipeline(Window& window, Camera& camera, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer);
     ~VulkanPipeline();
 
     void InitVulkan();

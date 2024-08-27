@@ -2,11 +2,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-
-#include "mesh/mesh.h"
-#include "renderer/vulkan/vulkan_device.h"
 #include "renderer/vulkan/vulkan_pipeline.h"
-#include "view/window.h"
 
 class Engine {
 public:
@@ -17,11 +13,12 @@ public:
     void MainLoop();
 
 private:
-
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
+    const uint32_t WIDTH = 1200;
+    const uint32_t HEIGHT = 1000;
     Window window{ WIDTH, HEIGHT, "VulkanWindow" };
+    Camera camera{};
+    MainCamera mainCamera{};
     VulkanDevice device{ window };
     TinyObjectImporter importer{};
-    VulkanPipeline vulkanPipline{ window, device, importer};
+    VulkanPipeline vulkanPipline{ window, camera, mainCamera, device, importer};
 };
