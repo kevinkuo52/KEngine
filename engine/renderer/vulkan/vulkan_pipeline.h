@@ -7,7 +7,6 @@
 #include <vector>
 #include "vulkan_device.h"
 #include "../../mesh/mesh.h"
-#include "../../view/camera.h"
 #include "../../view/main_camera.h"
 #include "../../view/window.h"
 #include "../../importer/tinyobj_importer.h"
@@ -27,11 +26,8 @@ private:
     VkDeviceMemory indexBufferMemory;
 
     const int MAX_FRAMES_IN_FLIGHT = 2;
-    const std::string MODEL_PATH = "application/scene_asset/model/viking_room.obj";
-    const std::string TEXTURE_PATH = "application/scene_asset/model/viking_room.png";
 
     Window& window;
-    Camera& camera;
     MainCamera& mainCamera;
     VulkanDevice& device;
     TinyObjectImporter& importer;
@@ -111,7 +107,7 @@ private:
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 public:
-    VulkanPipeline(Window& window, Camera& camera, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer);
+    VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer);
     ~VulkanPipeline();
 
     void InitVulkan();

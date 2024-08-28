@@ -5,6 +5,7 @@
 class MainCamera
 {
 public:
+    const float FOV = 45.0f;
     float mouseSensitivity = 0.005f;
     float movementSpeed = 0.005f;
     glm::vec3 velocity;

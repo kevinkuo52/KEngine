@@ -16,9 +16,8 @@ private:
     const uint32_t WIDTH = 1200;
     const uint32_t HEIGHT = 1000;
     Window window{ WIDTH, HEIGHT, "VulkanWindow" };
-    Camera camera{};
     MainCamera mainCamera{};
     VulkanDevice device{ window };
     TinyObjectImporter importer{};
-    VulkanPipeline vulkanPipline{ window, camera, mainCamera, device, importer};
+    VulkanPipeline vulkanPipline{ window, mainCamera, device, importer};
 };

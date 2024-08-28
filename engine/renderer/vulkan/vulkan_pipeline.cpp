@@ -11,8 +11,8 @@
 
 // TODO REFACOR IN PROGRESS . . .
 
-VulkanPipeline::VulkanPipeline(Window& window, Camera& camera, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer) : 
-    window(window), camera(camera), mainCamera(mainCamera), device(device), importer(importer)
+VulkanPipeline::VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer) : 
+    window(window), mainCamera(mainCamera), device(device), importer(importer)
 {
     InitVulkan();
 }
@@ -525,7 +525,7 @@ bool hasStencilComponent(VkFormat format) {
 
 void VulkanPipeline::CreateTextureImage() {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(importer.TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) {
@@ -840,7 +840,6 @@ void VulkanPipeline::UpdateUniformBuffer(uint32_t currentImage) {
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    camera.ProcessKeyboard(window.GetGLFWwindow(), time, false);
     mainCamera.ProcessKeyboard(window.GetGLFWwindow(), time, false);
     mainCamera.Update();
     UniformBufferObject ubo{};
@@ -850,7 +849,7 @@ void VulkanPipeline::UpdateUniformBuffer(uint32_t currentImage) {
     ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
     */
 
-    ubo.proj = glm::perspective(glm::radians(camera.Fov), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 1000.0f);
+    ubo.proj = glm::perspective(glm::radians(mainCamera.FOV), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 1000.0f);
     ubo.view = mainCamera.GetViewMatrix();//glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 8.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
     if (printCount < 5) {
