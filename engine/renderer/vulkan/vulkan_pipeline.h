@@ -17,8 +17,7 @@ class VulkanPipeline
 {
 private:
 
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+    Mesh mesh;
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;

@@ -13,7 +13,9 @@ TinyObjectImporter::TinyObjectImporter()
 
 }
 
-void TinyObjectImporter::LoadModel(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) {
+Mesh TinyObjectImporter::LoadModel() {
+    Mesh mesh{};
+    
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -42,11 +44,13 @@ void TinyObjectImporter::LoadModel(std::vector<Vertex>& vertices, std::vector<ui
             vertex.color = { 1.0f, 1.0f, 1.0f };
 
             if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                vertices.push_back(vertex);
+                uniqueVertices[vertex] = static_cast<uint32_t>(mesh.vertices.size());
+                mesh.vertices.push_back(vertex);
             }
 
-            indices.push_back(uniqueVertices[vertex]);
+            mesh.indices.push_back(uniqueVertices[vertex]);
         }
     }
+
+    return mesh;
 }
