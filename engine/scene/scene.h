@@ -11,6 +11,7 @@ class Scene
 public:
 	Scene(TinyObjectImporter& importer);
 	~Scene();
-	Mesh GetMesh() { return mesh; };
+	//	Mesh GetMesh() { return mesh; };
+	SceneNode* GetSceneNode(std::string name) { return sceneNodeLookup[name]; };
 };
 
