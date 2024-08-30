@@ -10,15 +10,13 @@
 #include "../../view/main_camera.h"
 #include "../../view/window.h"
 #include "../../importer/tinyobj_importer.h"
+#include "../../scene/scene.h"
 
 // TODO REFACOR IN PROGRESS . . .
 
 class VulkanPipeline
 {
 private:
-
-    Mesh mesh;
-
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
@@ -29,7 +27,7 @@ private:
     Window& window;
     MainCamera& mainCamera;
     VulkanDevice& device;
-    TinyObjectImporter& importer;
+    Scene& scene;
 
     VkSwapchainKHR swapChain;
     // implicitly destroyed when swapChain is destroyed
@@ -106,7 +104,7 @@ private:
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 public:
-    VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer);
+    VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, Scene& scene);
     ~VulkanPipeline();
 
     void InitVulkan();

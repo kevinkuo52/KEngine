@@ -11,6 +11,7 @@
 #include <glm/gtx/hash.hpp>
 
 #include <array>
+#include <string>
 
 struct Vertex {
     glm::vec3 pos;
@@ -29,6 +30,8 @@ struct Vertex {
 struct Mesh {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+    // TODO move this out of mesh struct
+    std::string texturePath;
 };
 
 namespace std {

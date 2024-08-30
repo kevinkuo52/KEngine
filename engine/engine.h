@@ -19,5 +19,6 @@ private:
     MainCamera mainCamera{};
     VulkanDevice device{ window };
     TinyObjectImporter importer{};
-    VulkanPipeline vulkanPipline{ window, mainCamera, device, importer};
+    Scene scene{ importer };
+    VulkanPipeline vulkanPipline{ window, mainCamera, device, scene };
 };

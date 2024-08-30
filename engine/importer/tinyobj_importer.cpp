@@ -15,6 +15,7 @@ TinyObjectImporter::TinyObjectImporter()
 
 Mesh TinyObjectImporter::LoadModel() {
     Mesh mesh{};
+    mesh.texturePath = TEXTURE_PATH;
     
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;

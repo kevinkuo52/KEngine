@@ -11,8 +11,8 @@
 
 // TODO REFACOR IN PROGRESS . . .
 
-VulkanPipeline::VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, TinyObjectImporter& importer) : 
-    window(window), mainCamera(mainCamera), device(device), importer(importer)
+VulkanPipeline::VulkanPipeline(Window& window, MainCamera& mainCamera, VulkanDevice& device, Scene& scene) : 
+    window(window), mainCamera(mainCamera), device(device), scene(scene)
 {
     InitVulkan();
 }
@@ -65,7 +65,6 @@ void VulkanPipeline::InitVulkan()
     CreateTextureImage();
     CreateTextureImageView();
     CreateTextureSampler();
-    mesh = importer.LoadModel();
     CreateVertexBuffer();
     CreateIndexBuffer();
     CreateUniformBuffers();
@@ -525,7 +524,7 @@ bool hasStencilComponent(VkFormat format) {
 
 void VulkanPipeline::CreateTextureImage() {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(importer.TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(scene.GetMesh().texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) {
@@ -747,7 +746,7 @@ void VulkanPipeline::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh.indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(scene.GetMesh().indices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 
@@ -779,7 +778,7 @@ void VulkanPipeline::CreateSyncObjects() {
 }
 
 void VulkanPipeline::CreateVertexBuffer() {
-    VkDeviceSize bufferSize = sizeof(mesh.vertices[0]) * mesh.vertices.size();
+    VkDeviceSize bufferSize = sizeof(scene.GetMesh().vertices[0]) * scene.GetMesh().vertices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -787,7 +786,7 @@ void VulkanPipeline::CreateVertexBuffer() {
 
     void* data;
     vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, mesh.vertices.data(), (size_t)bufferSize);
+    memcpy(data, scene.GetMesh().vertices.data(), (size_t)bufferSize);
     vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
 
     device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
@@ -798,7 +797,7 @@ void VulkanPipeline::CreateVertexBuffer() {
 }
 
 void VulkanPipeline::CreateIndexBuffer() {
-    VkDeviceSize bufferSize = sizeof(mesh.indices[0]) * mesh.indices.size();
+    VkDeviceSize bufferSize = sizeof(scene.GetMesh().indices[0]) * scene.GetMesh().indices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -806,7 +805,7 @@ void VulkanPipeline::CreateIndexBuffer() {
 
     void* data;
     vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, mesh.indices.data(), (size_t)bufferSize);
+    memcpy(data, scene.GetMesh().indices.data(), (size_t)bufferSize);
     vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
 
     device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
