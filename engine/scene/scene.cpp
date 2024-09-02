@@ -11,6 +11,13 @@ Scene::Scene(TinyObjectImporter& importer, VulkanDevice& device) : _importer(imp
 
 Scene::~Scene()
 {
+
+}
+
+void Scene::Draw(VkCommandBuffer commandBuffer)
+{
+	//TODO properly traverse the graph
+	_sceneNodeLookup["level"]->GetMesh()->Draw(commandBuffer);
 }
 
 void Scene::Draw(VkCommandBuffer commandBuffer)
