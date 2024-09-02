@@ -17,6 +17,7 @@
 class VulkanPipeline
 {
 private:
+
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;

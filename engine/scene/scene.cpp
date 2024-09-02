@@ -1,13 +1,21 @@
 #include "scene.h"
 
-Scene::Scene(TinyObjectImporter& importer) : importer(importer)
+Scene::Scene(TinyObjectImporter& importer, VulkanDevice& device) : _importer(importer), _device(device)
 {
-	mesh = importer.LoadModel();
-	sceneNodeLookup.insert({ "level", new SceneNode("level", &mesh) });
-	sceneNodeLookup.insert({ "camera", new SceneNode("camera") });
-	sceneNodeLookup.insert({ "light", new SceneNode("light") });
+	std::shared_ptr<Mesh> mesh = importer.LoadModel();
+	mesh->MeshUpload(_device);
+	_sceneNodeLookup.insert({ "level", new SceneNode("level", mesh) });
+	_sceneNodeLookup.insert({ "camera", new SceneNode("camera") });
+	_sceneNodeLookup.insert({ "light", new SceneNode("light") });
 }
 
 Scene::~Scene()
 {
+
+}
+
+void Scene::Draw(VkCommandBuffer commandBuffer)
+{
+	//TODO properly traverse the graph
+	_sceneNodeLookup["level"]->GetMesh()->Draw(commandBuffer);
 }

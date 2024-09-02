@@ -14,5 +14,5 @@ public:
 	const std::string TEXTURE_PATH = "application/scene_asset/model/white_stone.png";
 
 	TinyObjectImporter();
-	Mesh LoadModel();
+	std::shared_ptr<Mesh> LoadModel();
 };

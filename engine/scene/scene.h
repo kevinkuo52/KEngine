@@ -5,13 +5,14 @@
 
 class Scene
 {
-	TinyObjectImporter& importer;
-	Mesh mesh;
-	std::unordered_map<std::string, SceneNode*> sceneNodeLookup;
+	TinyObjectImporter& _importer;
+	VulkanDevice& _device;
+	std::unordered_map<std::string, SceneNode*> _sceneNodeLookup;
 public:
-	Scene(TinyObjectImporter& importer);
+	Scene(TinyObjectImporter& importer, VulkanDevice& device);
 	~Scene();
 	//	Mesh GetMesh() { return mesh; };
-	SceneNode* GetSceneNode(std::string name) { return sceneNodeLookup[name]; };
+	SceneNode* GetSceneNode(std::string name) { return _sceneNodeLookup[name]; };
+	void Draw(VkCommandBuffer commandBuffer);
 };
 
