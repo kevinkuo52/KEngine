@@ -13,9 +13,9 @@ TinyObjectImporter::TinyObjectImporter()
 
 }
 
-Mesh TinyObjectImporter::LoadModel() {
-    Mesh mesh{};
-    mesh.texturePath = TEXTURE_PATH;
+std::shared_ptr<Mesh> TinyObjectImporter::LoadModel() {
+    std::shared_ptr<Mesh>  mesh = std::make_shared<Mesh>();
+    mesh->texturePath = TEXTURE_PATH;
     
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -45,11 +45,11 @@ Mesh TinyObjectImporter::LoadModel() {
             vertex.color = { 1.0f, 1.0f, 1.0f };
 
             if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(mesh.vertices.size());
-                mesh.vertices.push_back(vertex);
+                uniqueVertices[vertex] = static_cast<uint32_t>(mesh->vertices.size());
+                mesh->vertices.push_back(vertex);
             }
 
-            mesh.indices.push_back(uniqueVertices[vertex]);
+            mesh->indices.push_back(uniqueVertices[vertex]);
         }
     }
 

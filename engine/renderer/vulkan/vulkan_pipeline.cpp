@@ -33,12 +33,6 @@ VulkanPipeline::~VulkanPipeline() {
         vkFreeMemory(device.GetDevice(), uniformBuffersMemory[i], nullptr);
     }
 
-    vkDestroyBuffer(device.GetDevice(), indexBuffer, nullptr);
-    vkFreeMemory(device.GetDevice(), indexBufferMemory, nullptr);
-
-    vkDestroyBuffer(device.GetDevice(), vertexBuffer, nullptr);
-    vkFreeMemory(device.GetDevice(), vertexBufferMemory, nullptr);
-
     vkDestroyPipeline(device.GetDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device.GetDevice(), pipelineLayout, nullptr);
 
@@ -65,8 +59,6 @@ void VulkanPipeline::InitVulkan()
     CreateTextureImage();
     CreateTextureImageView();
     CreateTextureSampler();
-    CreateVertexBuffer();
-    CreateIndexBuffer();
     CreateUniformBuffers();
     CreateDescriptorPool();
     CreateDescriptorSets();
@@ -740,14 +732,9 @@ void VulkanPipeline::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    VkBuffer vertexBuffers[] = { vertexBuffer };
-    VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(scene.GetSceneNode("level")->GetMesh()->indices.size()), 1, 0, 0, 0);
-
+    
+    scene.Draw(commandBuffer);
     vkCmdEndRenderPass(commandBuffer);
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -775,45 +762,6 @@ void VulkanPipeline::CreateSyncObjects() {
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }
     }
-}
-
-void VulkanPipeline::CreateVertexBuffer() {
-    VkDeviceSize bufferSize = sizeof(scene.GetSceneNode("level")->GetMesh()->vertices[0]) * scene.GetSceneNode("level")->GetMesh()->vertices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, scene.GetSceneNode("level")->GetMesh()->vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
-
-    device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-    device.CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-    vkDestroyBuffer(device.GetDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(device.GetDevice(), stagingBufferMemory, nullptr);
-}
-
-void VulkanPipeline::CreateIndexBuffer() {
-    VkDeviceSize bufferSize = sizeof(scene.GetSceneNode("level")->GetMesh()->indices[0]) * scene.GetSceneNode("level")->GetMesh()->indices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(device.GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, scene.GetSceneNode("level")->GetMesh()->indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device.GetDevice(), stagingBufferMemory);
-
-    device.CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
-    device.CopyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-    vkDestroyBuffer(device.GetDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(device.GetDevice(), stagingBufferMemory, nullptr);
 }
 
 void VulkanPipeline::CreateUniformBuffers() {

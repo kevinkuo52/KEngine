@@ -13,8 +13,8 @@ TODO list
 
 Current Features
 - Camera with interactive input
-- Model import
-- Texture import
+- Obj import
+- Texture
 
 ![image](https://github.com/user-attachments/assets/1243adb2-479a-4c01-9fc3-d46b6d0a03cb)
 

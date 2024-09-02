@@ -17,11 +17,6 @@
 class VulkanPipeline
 {
 private:
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
-
     const int MAX_FRAMES_IN_FLIGHT = 2;
 
     Window& window;

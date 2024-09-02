@@ -1,6 +1,6 @@
 #include "scene_node.h"
 
-SceneNode::SceneNode(std::string name, Mesh* mesh, SceneNode* parent, std::vector<SceneNode*> children) 
+SceneNode::SceneNode(std::string name, std::shared_ptr<Mesh> mesh, SceneNode* parent, std::vector<SceneNode*> children)
 	: name(name), mesh(mesh), parent(parent), children(children)
 {
 }

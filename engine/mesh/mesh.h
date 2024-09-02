@@ -11,7 +11,15 @@
 #include <glm/gtx/hash.hpp>
 
 #include <array>
+#include <memory>
 #include <string>
+#include "../renderer/vulkan/vulkan_buffer.h"
+
+struct UniformBufferObject {
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+};
 
 struct Vertex {
     glm::vec3 pos;
@@ -27,11 +35,23 @@ struct Vertex {
     }
 };
 
-struct Mesh {
+class Mesh {
+    std::unique_ptr<VulkanBuffer> _vertexBuffer;
+    std::unique_ptr<VulkanBuffer> _indexBuffer;
+    
+public:
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
-    // TODO move this out of mesh struct
     std::string texturePath;
+    Mesh();
+    ~Mesh();
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+    void MeshUpload(VulkanDevice& device);
+    void Draw(VkCommandBuffer commandBuffer);
+private:
+    void CreateVertexBuffer(VulkanDevice& device);
+    void CreateIndexBuffer(VulkanDevice& device);
 };
 
 namespace std {
@@ -42,9 +62,5 @@ namespace std {
     };
 }
 
-struct UniformBufferObject {
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 proj;
-};
+
 
