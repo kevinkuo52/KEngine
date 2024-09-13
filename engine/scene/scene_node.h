@@ -17,6 +17,10 @@ public:
 	std::shared_ptr<Mesh> GetMesh() { return mesh; };
 	SceneNode* GetParent() { return parent; };
 	std::vector<SceneNode*> GetChildren() { return children; };
+	void AddChild(SceneNode* child) { children.push_back(child); };
+	void AddChildren(std::vector<SceneNode*> childrenToAdd) { 
+		children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end()); 
+	}
 	void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 };
 

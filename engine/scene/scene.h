@@ -8,6 +8,7 @@ class Scene
 	TinyObjectImporter& _importer;
 	VulkanDevice& _device;
 	std::unordered_map<std::string, SceneNode*> _sceneNodeLookup;
+	SceneNode* _root;
 public:
 	Scene(TinyObjectImporter& importer, VulkanDevice& device);
 	~Scene();

@@ -1,16 +1,23 @@
 #include "scene.h"
+#include <stack>
 
 Scene::Scene(TinyObjectImporter& importer, VulkanDevice& device) : _importer(importer), _device(device)
 {
+	_root = new SceneNode("level");
 	std::shared_ptr<Mesh> mesh = importer.LoadModel();
 	mesh->MeshUpload(_device);
 	_sceneNodeLookup.insert({ "obj1", new SceneNode("obj1", mesh) });
-
+	_root->AddChild(_sceneNodeLookup["obj1"]);
 	std::shared_ptr<Mesh> mesh2 = importer.LoadModel();
 	mesh2->MeshUpload(_device);
-	_sceneNodeLookup.insert({ "obj2", new SceneNode("obj2", mesh2) });
+	_sceneNodeLookup.insert({ "obj2", new SceneNode("obj2", mesh) });
+	_sceneNodeLookup["obj1"]->AddChild(_sceneNodeLookup["obj2"]);
+	
 	_sceneNodeLookup.insert({ "camera", new SceneNode("camera") });
+	_root->AddChild(_sceneNodeLookup["camera"]);
+
 	_sceneNodeLookup.insert({ "light", new SceneNode("light") });
+	_root->AddChild(_sceneNodeLookup["light"]);
 }
 
 Scene::~Scene()
@@ -26,7 +33,14 @@ void Scene::Update(float time)
 
 void Scene::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
-	//TODO properly traverse the graph
-	_sceneNodeLookup["obj1"]->Draw(commandBuffer, pipelineLayout);
-	_sceneNodeLookup["obj2"]->Draw(commandBuffer, pipelineLayout);
+	std::stack<SceneNode*> stack({ _root });
+	
+	while (!stack.empty()) {
+		SceneNode* curr = stack.top();
+		curr->Draw(commandBuffer, pipelineLayout);
+		stack.pop();
+		for (SceneNode* node : curr->GetChildren()) {
+			stack.push(node);
+		}
+	}
 }

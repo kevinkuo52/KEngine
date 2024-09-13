@@ -9,5 +9,8 @@ SceneNode::SceneNode(std::string name, std::shared_ptr<Mesh> mesh, SceneNode* pa
 void SceneNode::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
 	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstant), &transformation);
+	if (mesh != nullptr) {
 	mesh->Draw(commandBuffer);
+	}
+
 }

@@ -521,7 +521,7 @@ bool hasStencilComponent(VkFormat format) {
 
 void VulkanPipeline::CreateTextureImage() {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(scene.GetSceneNode("level")->GetMesh()->texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(scene.GetSceneNode("obj1")->GetMesh()->texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) {
