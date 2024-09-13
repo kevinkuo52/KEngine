@@ -21,6 +21,10 @@ struct UniformBufferObject {
     alignas(16) glm::mat4 proj;
 };
 
+struct PushConstant {
+    alignas(16) glm::mat4 transform;
+};
+
 struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;

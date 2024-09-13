@@ -13,6 +13,7 @@ public:
 	~Scene();
 	//	Mesh GetMesh() { return mesh; };
 	SceneNode* GetSceneNode(std::string name) { return _sceneNodeLookup[name]; };
-	void Draw(VkCommandBuffer commandBuffer);
+	void Update(float time);
+	void Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout);
 };
 

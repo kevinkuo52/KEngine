@@ -14,14 +14,13 @@ Scene::~Scene()
 
 }
 
-void Scene::Draw(VkCommandBuffer commandBuffer)
+void Scene::Update(float time)
 {
-	//TODO properly traverse the graph
-	_sceneNodeLookup["level"]->GetMesh()->Draw(commandBuffer);
+	_sceneNodeLookup["level"]->SetTransformation(glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 }
 
-void Scene::Draw(VkCommandBuffer commandBuffer)
+void Scene::Draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout)
 {
 	//TODO properly traverse the graph
-	_sceneNodeLookup["level"]->GetMesh()->Draw(commandBuffer);
+	_sceneNodeLookup["level"]->Draw(commandBuffer, pipelineLayout);
 }
