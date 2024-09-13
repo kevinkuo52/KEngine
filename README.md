@@ -4,11 +4,9 @@ learning vulkan
 TODO list
 1. Refactor and clean up code [In Progress]
 2. Fix code style
-3. Implement Scene Graph with transformation matrix for each node
+3. Implement Scene Graph with transformation matrix for each node [In Progress]
 4. Implement Ray Tracing with BVH
 5. Implement Ray Marching
-6. Use push constants instead of ubo for transformation
-
 ...
 
 Current Features
