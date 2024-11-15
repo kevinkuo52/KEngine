@@ -25,6 +25,32 @@ struct PushConstant {
     alignas(16) glm::mat4 transform;
 };
 
+// Push constant structure for the ray tracer
+struct PushConstantRay
+{
+    alignas(16) glm::vec4  clearColor;
+    alignas(16) glm::vec3  lightPosition;
+    alignas(16) float lightIntensity;
+    alignas(16) int   lightType;
+};
+
+// The OBJ model
+struct ObjModel
+{
+    uint32_t     nbIndices{ 0 };
+    uint32_t     nbVertices{ 0 };
+    VulkanBuffer vertexBuffer;    // Device buffer of all 'Vertex'
+    VulkanBuffer indexBuffer;     // Device buffer of the indices forming triangles
+    VulkanBuffer matColorBuffer;  // Device buffer of array of 'Wavefront material'
+    VulkanBuffer matIndexBuffer;  // Device buffer of array of 'Wavefront material'
+};
+
+struct ObjInstance
+{
+    glm::mat4 transform;    // Matrix of the instance
+    uint32_t  objIndex{ 0 };  // Model index reference
+};
+
 struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;

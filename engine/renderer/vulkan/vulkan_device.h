@@ -24,13 +24,15 @@ struct SwapChainSupportDetails {
 class VulkanDevice
 {
 public:
+    const unsigned int VULKAN_API_VERSION_MAJOR = 1;
+	const unsigned int VULKAN_API_VERSION_MINOR = 3;
     #ifdef NDEBUG
         const bool enableValidationLayers = false;
     #else
         const bool enableValidationLayers = true;
     #endif
 
-    VulkanDevice(Window& window);
+    VulkanDevice(Window& window, const std::vector<void*> properties2);
     ~VulkanDevice();
 
     VkCommandPool GetCommandPool() { return commandPool; }
@@ -66,6 +68,7 @@ private:
     void PickPhysicalDevice();
     void CreateLogicalDevice();
     void CreateCommandPool();
+    void CreatePhysicalDeviceProperties2();
 
     // helper functions
     bool IsDeviceSuitable(VkPhysicalDevice device);
@@ -79,6 +82,7 @@ private:
 
     VkInstance instance;
     Window& window;
+    const std::vector<void*> properties2;
     VkSurfaceKHR surface;
     // implicitly destroyed when the VkInstance is destroyed
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -93,7 +97,50 @@ private:
 
     VkDebugUtilsMessengerEXT debugMessenger;
    
-    const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-    const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation"};
+    const std::vector<const char*> deviceExtensions = { 
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		// ray tracing extensions
+        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+            // dependency of ACCELERATION_STRUCTURE
+            //VK_VERSION_1_1,
+            //VK_EXT_descriptor_indexing, 
+            //VK_KHR_buffer_device_address,
+        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+        
+        };
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelFeature{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR };
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeature{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR };
+
+    const std::vector<void*> featureStructs = {
+        &accelFeature,
+        &rtPipelineFeature
+    };
+
+    struct ExtensionHeader  // Helper struct to link extensions together
+    {
+        VkStructureType sType;
+        void* pNext;
+    };
+
+    // This struct holds all core feature information for a physical device
+    struct PhysicalDeviceInfo
+    {
+        VkPhysicalDeviceMemoryProperties     memoryProperties{};
+        std::vector<VkQueueFamilyProperties> queueProperties;
+
+        VkPhysicalDeviceFeatures         features10{};
+        VkPhysicalDeviceVulkan11Features features11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
+        VkPhysicalDeviceVulkan12Features features12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
+        VkPhysicalDeviceVulkan13Features features13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
+
+        VkPhysicalDeviceProperties         properties10{};
+        VkPhysicalDeviceVulkan11Properties properties11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES };
+        VkPhysicalDeviceVulkan12Properties properties12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES };
+        VkPhysicalDeviceVulkan13Properties properties13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_PROPERTIES };
+    };
+
+    PhysicalDeviceInfo m_physicalInfo;
 };
 

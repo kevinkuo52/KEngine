@@ -9,7 +9,7 @@ void Window::FramebufferResizeCallback(GLFWwindow* window, int width, int height
     windowPtr->height = height;
 }
 
-Window::Window(int w, int h, std::string name)
+Window::Window(uint32_t w, uint32_t h, std::string name)
 {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

@@ -1,4 +1,5 @@
 #include "vulkan_device.h"
+#include "vulkan_extensions.h"
 #include <iostream>
 #include <set>
 #include <stdexcept>
@@ -31,15 +32,18 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
     return VK_FALSE;
 }
 
-VulkanDevice::VulkanDevice(Window& window) : window{ window } {
+VulkanDevice::VulkanDevice(Window& window, const std::vector<void*> properties2) : window{ window }, properties2{ properties2 } {
     CreateInstance();
     SetupDebugMessenger();
     window.CreateWindowSurface(instance, &surface);
     PickPhysicalDevice();
     CreateLogicalDevice();
+    LoadVulkanExtensions(instance, vkGetInstanceProcAddr, device, vkGetDeviceProcAddr);
     CreateCommandPool();
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+	CreatePhysicalDeviceProperties2();
 }
+
 
 VulkanDevice::~VulkanDevice() {
     vkDestroyCommandPool(device, commandPool, nullptr);
@@ -238,37 +242,34 @@ void VulkanDevice::CreateInstance()
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Game Engine";
-    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.applicationVersion = VK_MAKE_VERSION(VULKAN_API_VERSION_MAJOR, VULKAN_API_VERSION_MINOR, 0);
     appInfo.pEngineName = "Game Engine";
-    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.engineVersion = VK_MAKE_VERSION(VULKAN_API_VERSION_MAJOR, VULKAN_API_VERSION_MINOR, 0);
+    appInfo.apiVersion = VK_MAKE_VERSION(VULKAN_API_VERSION_MAJOR, VULKAN_API_VERSION_MINOR, 0);
+
+	std::cout << "Requested Vulkan API Version: " << VK_VERSION_MAJOR(appInfo.apiVersion) << "." << VK_VERSION_MINOR(appInfo.apiVersion) << std::endl;
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-
-    uint32_t glfwExtensionCount = 0;
-    const char** glfwExtensions;
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-    createInfo.enabledExtensionCount = glfwExtensionCount;
-    createInfo.ppEnabledExtensionNames = glfwExtensions;
-
-    createInfo.enabledLayerCount = 0;
-
+    
     // list out supported extensions
-    /*
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    std::vector<VkExtensionProperties> extensions(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-    std::cout << "available extensions:\n";
-    for (const auto& extension : extensions) {
+    std::vector<VkExtensionProperties> supportedExtensions(extensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, supportedExtensions.data());
+    std::cout << "Available Instance Extensions:\n";
+    for (const auto& extension : supportedExtensions) {
         std::cout << '\t' << extension.extensionName << '\n';
     }
-    */
 
     auto extensions = GetRequiredExtensions();
+
+    std::cout << "Requested Instance Extensions:\n";
+    for (const auto& extension : extensions) {
+        std::cout << '\t' << extension << '\n';
+    }
+
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
 
@@ -351,7 +352,8 @@ void VulkanDevice::CreateLogicalDevice()
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    //createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.pEnabledFeatures = nullptr;
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
@@ -368,6 +370,47 @@ void VulkanDevice::CreateLogicalDevice()
     else {
         createInfo.enabledLayerCount = 0;
     }
+
+    // features begin
+    
+    VkPhysicalDeviceFeatures2 features2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
+    VkPhysicalDeviceVulkan13Features features13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
+	features2.features = m_physicalInfo.features10;
+
+    // TODO do these based on API version
+    // if 1.2
+    features2.pNext = &m_physicalInfo.features11;
+    m_physicalInfo.features11.pNext = &m_physicalInfo.features12;
+    m_physicalInfo.features12.pNext = nullptr;
+    // if 1.3
+    m_physicalInfo.features12.pNext = &m_physicalInfo.features13;
+    m_physicalInfo.features13.pNext = nullptr;
+
+    if (!featureStructs.empty())
+    {
+        // build up chain of all used extension features
+        for (size_t i = 0; i < featureStructs.size(); i++)
+        {
+            auto* header = reinterpret_cast<ExtensionHeader*>(featureStructs[i]);
+            header->pNext = i < featureStructs.size() - 1 ? featureStructs[i + 1] : nullptr;
+        }
+
+        // append to the end of current feature2 struct chain
+        ExtensionHeader* lastCoreFeature = (ExtensionHeader*)&features2;
+        while (lastCoreFeature->pNext != nullptr)
+        {
+            lastCoreFeature = (ExtensionHeader*)lastCoreFeature->pNext;
+        }
+        lastCoreFeature->pNext = featureStructs[0];
+        
+
+        // query support
+        vkGetPhysicalDeviceFeatures2(physicalDevice, &features2);
+    }
+
+    createInfo.pNext = &features2;
+    
+    // features end
 
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
@@ -389,6 +432,26 @@ void VulkanDevice::CreateCommandPool()
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
+}
+
+void VulkanDevice::CreatePhysicalDeviceProperties2()
+{
+    if (properties2.empty()) {
+        return;
+    }
+
+	VkPhysicalDeviceProperties2 prop2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
+
+    // build up chain of all used properties2
+    for (size_t i = 0; i < properties2.size(); i++)
+    {
+        auto* header = reinterpret_cast<ExtensionHeader*>(properties2[i]);
+        header->pNext = i < properties2.size() - 1 ? properties2[i + 1] : nullptr;
+    }
+
+	prop2.pNext = properties2[0];
+
+	vkGetPhysicalDeviceProperties2(physicalDevice, &prop2);
 }
 
 bool VulkanDevice::IsDeviceSuitable(VkPhysicalDevice device)
@@ -419,8 +482,16 @@ bool VulkanDevice::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 
     std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
+    std::cout << "Available Device Extensions:\n";
     for (const auto& extension : availableExtensions) {
+        std::cout << '\t' << extension.extensionName << '\n';
         requiredExtensions.erase(extension.extensionName);
+    }
+
+    std::cout << "Requested Device Extensions:\n";
+    for (const auto& extension : deviceExtensions) {
+        std::cout << '\t' << extension << '\n';
+        requiredExtensions.erase(extension);
     }
 
     return requiredExtensions.empty();

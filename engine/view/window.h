@@ -9,14 +9,14 @@ class Window
 private:
 	static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
 
-	int width;
-	int height;
+	uint32_t width;
+	uint32_t height;
 	bool framebufferResized = false;
 
 	std::string windowName;
 	GLFWwindow* window;
 public:
-	Window(int w, int h, std::string name);
+	Window(uint32_t w, uint32_t h, std::string name);
 	~Window();
 
 	Window(const Window&) = delete;
